@@ -1,0 +1,13 @@
+2025-04-07 21:58:02,300 - mcp.server.lowlevel.server - DEBUG - [server.py:145] - Initializing server 'UnrealMCP'
+2025-04-07 21:58:02,300 - mcp.server.lowlevel.server - DEBUG - [server.py:384] - Registering handler for ListToolsRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:406] - Registering handler for CallToolRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:252] - Registering handler for ListResourcesRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:286] - Registering handler for ReadResourceRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:222] - Registering handler for PromptListRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:239] - Registering handler for GetPromptRequest
+2025-04-07 21:58:02,301 - mcp.server.lowlevel.server - DEBUG - [server.py:267] - Registering handler for ListResourceTemplatesRequest
+2025-04-07 21:58:59,102 - asyncio - DEBUG - [proactor_events.py:634] - Using proactor: IocpProactor
+2025-04-07 21:59:00,150 - UnrealMCP - INFO - [unreal_mcp_server.py:41] - Received command: CreateBlueprint with params: {'name': 'TestBlueprint', 'parentClass': 'Actor'}
+2025-04-07 21:59:00,150 - UnrealMCP - INFO - [unreal_mcp_server.py:64] - Creating Blueprint: TestBlueprint (parent: Actor)
+2025-04-07 21:59:00,156 - UnrealMCP - INFO - [unreal_mcp_server.py:41] - Received command: AddComponent with params: {'blueprintName': 'TestBlueprint', 'componentType': 'StaticMeshComponent', 'componentName': 'TestMesh', 'location': [0, 0, 0], 'rotation': [0, 0, 0], 'scale': [1, 1, 1]}
+2025-04-07 21:59:00,156 - UnrealMCP - INFO - [unreal_mcp_server.py:83] - Adding component TestMesh (StaticMeshComponent) to TestBlueprint
