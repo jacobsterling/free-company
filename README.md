@@ -1,70 +1,63 @@
-# Free Company
+# MCP Game Project
 
-An Unreal Engine project for managing and developing a free company system.
-
-## Description
-This project is built using Unreal Engine and aims to provide a comprehensive system for managing free companies, including features for company management, member interactions, and gameplay mechanics.
+This is an Unreal Engine project that uses the Mission Control Protocol (MCP) to automate various tasks in the editor.
 
 ## Project Structure
-```
-MCPGameProject/
-├── Content/
-│   ├── Characters/     # Character models and animations
-│   ├── Environments/   # Environment assets and levels
-│   ├── Blueprints/     # Blueprint classes
-│   ├── Materials/      # Material assets
-│   ├── Meshes/         # Static and skeletal meshes
-│   ├── UI/             # User interface elements
-│   └── VFX/            # Visual effects
-├── Source/
-│   └── MCPGameProject/ # C++ source code
-├── scripts/            # MCP automation scripts
-│   ├── actors/         # Actor-related scripts
-│   ├── blueprints/     # Blueprint-related scripts
-│   ├── node/           # Blueprint node scripts
-│   ├── create_character.py      # Character creation script
-│   ├── setup_character_input.py # Character input setup script
-│   ├── test_mcp_client.py      # MCP client test script
-│   └── unreal_mcp_server.py    # MCP server implementation
-└── Docs/               # Project documentation
-```
+
+- `mcp/` - Contains the Mission Control Protocol implementation
+  - `scripts/` - Python scripts for the MCP
+  - `Makefile` - Unix/Linux/macOS build script
+  - `mcp.bat` - Windows batch script
+  - `README.md` - Documentation for the MCP
+- `mcp-launcher.bat` - Windows launcher script (delegates to mcp/mcp.bat)
 
 ## Getting Started
-1. Clone the repository
-2. Open the project in Unreal Engine
-3. Start the MCP server:
-   ```
-   python scripts/unreal_mcp_server.py
-   ```
-4. Run the character creation script:
-   ```
-   python scripts/create_character.py
-   ```
-5. Set up character input:
-   ```
-   python scripts/setup_character_input.py
-   ```
-6. Build and run the project
 
-## Requirements
+### Prerequisites
+
 - Unreal Engine 5.x
-- Visual Studio 2019 or later (for development)
-- Python 3.8 or later (for MCP scripts)
-- Required Python packages (install with `pip install -r requirements.txt`):
-  - mcp[cli]>=1.4.1
-  - fastmcp>=0.2.0
-  - uvicorn
-  - fastapi
-  - pydantic>=2.6.1
-  - requests
+- Python 3.12+ (required for the MCP)
 
-## MCP Scripts
-The project includes several Python scripts for automating Unreal Engine tasks:
+### Setting Up the Virtual Environment
 
-- `unreal_mcp_server.py`: MCP server implementation for communicating with Unreal Engine
-- `create_character.py`: Creates character blueprints with components
-- `setup_character_input.py`: Sets up input handling for characters
-- `test_mcp_client.py`: Test client for MCP server
+The MCP uses a Python 3.12+ virtual environment to manage dependencies. The virtual environment is created in the `.venv` directory.
+
+**On Unix/Linux/macOS:**
+```bash
+make setup-venv
+```
+
+**On Windows:**
+```cmd
+mcp-launcher setup-venv
+```
+
+This will:
+1. Create a Python 3.12+ virtual environment if it doesn't exist
+2. Install the project dependencies from pyproject.toml
+
+### Running the MCP Server
+
+**On Unix/Linux/macOS:**
+```bash
+make start-server
+```
+
+**On Windows:**
+```cmd
+mcp-launcher start-server
+```
+
+### Setting Up the Game Mode
+
+```bash
+make setup-game
+```
+
+## Development
+
+See the [MCP README](mcp/README.md) for information on developing with the MCP.
 
 ## License
+
 This project is licensed under the MIT License - see the LICENSE file for details. 

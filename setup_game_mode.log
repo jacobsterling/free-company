@@ -1,2 +1,0 @@
-2025-04-09 12:22:56,988 - SetupGameMode - INFO - Creating game mode blueprint: BP_FCGameMode
-2025-04-09 12:22:56,990 - SetupGameMode - INFO - Sending command: {"command": "create_blueprint", "params": {"blueprintName": "BP_FCGameMode", "parentClass": "GameModeBase", "path": "/Game/Blueprints"}}
