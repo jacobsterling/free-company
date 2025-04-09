@@ -1,6 +1,7 @@
-mcp[cli]>=1.4.1
-fastmcp>=0.2.0
-uvicorn
-fastapi
-pydantic>=2.6.1
-requests 
+fastapi>=0.115.0
+uvicorn>=0.23.1
+pydantic>=2.7.2
+requests>=2.31.0
+python-multipart>=0.0.5
+mcp[cli]>=1.6.0
+fastmcp>=0.4.1 
