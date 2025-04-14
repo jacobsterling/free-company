@@ -1,0 +1,31 @@
+[project]
+name = "unreal-mcp"
+version = "0.1.0"
+description = "Unreal MCP Server: A server for Unreal Engine integration via the Model Context Protocol (MCP)."
+readme = "../README.md"
+requires-python = ">=3.12.6"
+dependencies = [
+  "mcp[cli]>=1.4.1",
+  "fastmcp>=0.2.0",
+  "uvicorn",
+  "fastapi",
+  "pydantic>=2.6.1",
+  "requests"
+]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Include Python packages with proper paths
+packages = [
+    "tools",
+    "scripts",
+    "scripts.actors",
+    "scripts.blueprints",
+    "scripts.node"
+]
+
+# Include unreal_mcp_server.py as a module
+py-modules = ["unreal_mcp_server"] 

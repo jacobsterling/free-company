@@ -41,6 +41,7 @@ ehthumbs.db
 Thumbs.db
 
 logs/
+*.log
 
 # Python specific
 __pycache__/

@@ -25,6 +25,9 @@
 #include "BlueprintActionDatabase.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Logging/LogMacros.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogMCP, Log, All);
 
 // JSON Utilities
 TSharedPtr<FJsonObject> FUnrealMCPCommonUtils::CreateErrorResponse(const FString& Message)
@@ -507,4 +510,9 @@ UK2Node_Event* FUnrealMCPCommonUtils::FindExistingEventNode(UEdGraph* Graph, con
     }
 
     return nullptr;
-} 
+}
+
+// Implementation methods if needed in the future
+
+// The majority of the utility functions are implemented as inlines in the header
+// This file is primarily a placeholder for any additional implementation that may be needed 

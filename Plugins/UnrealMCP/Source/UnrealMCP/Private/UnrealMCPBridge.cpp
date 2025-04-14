@@ -56,15 +56,19 @@
 #include "Commands/UnrealMCPBlueprintCommands.h"
 #include "Commands/UnrealMCPBlueprintNodeCommands.h"
 #include "Commands/UnrealMCPCommonUtils.h"
+#include "Commands/ActorCommandHandler.h"
 
 // Default settings
 #define MCP_SERVER_HOST "127.0.0.1"
 #define MCP_SERVER_PORT 55557
 
+// Define a log category for MCP
+DEFINE_LOG_CATEGORY_STATIC(LogMCP, Log, All);
+
 // Initialize subsystem
 void UUnrealMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
 {
-    UE_LOG(LogTemp, Display, TEXT("UnrealMCPBridge: Initializing"));
+    UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Initializing"));
     
     bIsRunning = false;
     ListenerSocket = nullptr;
@@ -78,6 +82,9 @@ void UUnrealMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
     EditorCommands = MakeShared<FUnrealMCPEditorCommands>();
     BlueprintCommands = MakeShared<FUnrealMCPBlueprintCommands>();
     BlueprintNodeCommands = MakeShared<FUnrealMCPBlueprintNodeCommands>();
+    
+    // Create our new command handler
+    ActorCommandHandler = MakeShared<FActorCommandHandler>();
 
     // Start the server automatically
     StartServer();
@@ -86,7 +93,7 @@ void UUnrealMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
 // Clean up resources when subsystem is destroyed
 void UUnrealMCPBridge::Deinitialize()
 {
-    UE_LOG(LogTemp, Display, TEXT("UnrealMCPBridge: Shutting down"));
+    UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Shutting down"));
     StopServer();
 }
 
@@ -95,7 +102,7 @@ void UUnrealMCPBridge::StartServer()
 {
     if (bIsRunning)
     {
-        UE_LOG(LogTemp, Warning, TEXT("UnrealMCPBridge: Server is already running"));
+        UE_LOG(LogMCP, Warning, TEXT("UnrealMCPBridge: Server is already running"));
         return;
     }
 
@@ -103,7 +110,7 @@ void UUnrealMCPBridge::StartServer()
     ISocketSubsystem* SocketSubsystem = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM);
     if (!SocketSubsystem)
     {
-        UE_LOG(LogTemp, Error, TEXT("UnrealMCPBridge: Failed to get socket subsystem"));
+        UE_LOG(LogMCP, Error, TEXT("UnrealMCPBridge: Failed to get socket subsystem"));
         return;
     }
 
@@ -111,7 +118,7 @@ void UUnrealMCPBridge::StartServer()
     TSharedPtr<FSocket> NewListenerSocket = MakeShareable(SocketSubsystem->CreateSocket(NAME_Stream, TEXT("UnrealMCPListener"), false));
     if (!NewListenerSocket.IsValid())
     {
-        UE_LOG(LogTemp, Error, TEXT("UnrealMCPBridge: Failed to create listener socket"));
+        UE_LOG(LogMCP, Error, TEXT("UnrealMCPBridge: Failed to create listener socket"));
         return;
     }
 
@@ -123,20 +130,20 @@ void UUnrealMCPBridge::StartServer()
     FIPv4Endpoint Endpoint(ServerAddress, Port);
     if (!NewListenerSocket->Bind(*Endpoint.ToInternetAddr()))
     {
-        UE_LOG(LogTemp, Error, TEXT("UnrealMCPBridge: Failed to bind listener socket to %s:%d"), *ServerAddress.ToString(), Port);
+        UE_LOG(LogMCP, Error, TEXT("UnrealMCPBridge: Failed to bind listener socket to %s:%d"), *ServerAddress.ToString(), Port);
         return;
     }
 
     // Start listening
     if (!NewListenerSocket->Listen(5))
     {
-        UE_LOG(LogTemp, Error, TEXT("UnrealMCPBridge: Failed to start listening"));
+        UE_LOG(LogMCP, Error, TEXT("UnrealMCPBridge: Failed to start listening"));
         return;
     }
 
     ListenerSocket = NewListenerSocket;
     bIsRunning = true;
-    UE_LOG(LogTemp, Display, TEXT("UnrealMCPBridge: Server started on %s:%d"), *ServerAddress.ToString(), Port);
+    UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Server started on %s:%d"), *ServerAddress.ToString(), Port);
 
     // Start server thread
     ServerThread = FRunnableThread::Create(
@@ -147,7 +154,7 @@ void UUnrealMCPBridge::StartServer()
 
     if (!ServerThread)
     {
-        UE_LOG(LogTemp, Error, TEXT("UnrealMCPBridge: Failed to create server thread"));
+        UE_LOG(LogMCP, Error, TEXT("UnrealMCPBridge: Failed to create server thread"));
         StopServer();
         return;
     }
@@ -184,13 +191,13 @@ void UUnrealMCPBridge::StopServer()
         ListenerSocket.Reset();
     }
 
-    UE_LOG(LogTemp, Display, TEXT("UnrealMCPBridge: Server stopped"));
+    UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Server stopped"));
 }
 
 // Execute a command received from a client
 FString UUnrealMCPBridge::ExecuteCommand(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
 {
-    UE_LOG(LogTemp, Display, TEXT("UnrealMCPBridge: Executing command: %s"), *CommandType);
+    UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Executing command: %s"), *CommandType);
     
     // Create a promise to wait for the result
     TPromise<FString> Promise;
@@ -205,7 +212,25 @@ FString UUnrealMCPBridge::ExecuteCommand(const FString& CommandType, const TShar
         {
             TSharedPtr<FJsonObject> ResultJson;
             
-            if (CommandType == TEXT("ping"))
+            // Check for our specific AddActor command first
+            if (CommandType.Equals(TEXT("AddActor"), ESearchCase::IgnoreCase))
+            {
+                UE_LOG(LogMCP, Display, TEXT("UnrealMCPBridge: Processing AddActor command"));
+                ResultJson = ActorCommandHandler->HandleAddActor(Params);
+                
+                // Set success status
+                ResponseJson->SetStringField(TEXT("status"), TEXT("success"));
+                ResponseJson->SetObjectField(TEXT("result"), ResultJson);
+                
+                // Special return for AddActor to avoid duplicate processing
+                FString ResultString;
+                TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ResultString);
+                FJsonSerializer::Serialize(ResponseJson.ToSharedRef(), Writer);
+                Promise.SetValue(ResultString);
+                return;
+            }
+            // Continue with standard commands
+            else if (CommandType == TEXT("ping"))
             {
                 ResultJson = MakeShareable(new FJsonObject);
                 ResultJson->SetStringField(TEXT("message"), TEXT("pong"));
